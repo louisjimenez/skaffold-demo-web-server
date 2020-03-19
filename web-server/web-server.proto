@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package todo;
+
+service Todo {
+  // A simple RPC for retrieving to do items
+
+  rpc ListTodos(Category) returns (stream TodoItem) {}
+}
+
+message Category {
+  string name = 1;
+}
+
+message TodoItem {
+  string description = 1;
+  Category category = 2;
+  int32 id = 3;
+}

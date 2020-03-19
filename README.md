@@ -4,4 +4,4 @@ An example Web Server microservice for evaluating Skaffold.
 
 ## Development
 
-`skaffold dev --default-repo <path-to-registry>`
+`skaffold dev --default-repo <path-to-registry> --port-forward`
