@@ -1,0 +1,11 @@
+apiVersion: skaffold/v2alpha4
+kind: Config
+metadata:
+  name: web-server
+build:
+  artifacts:
+  - image: web-server
+deploy:
+  kubectl:
+    manifests:
+    - kubernetes/deployment.yaml
