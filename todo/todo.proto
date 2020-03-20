@@ -3,7 +3,7 @@ syntax = "proto3";
 package todo;
 
 service Todo {
-  // A simple RPC for retrieving to do items
+  // A simple RPC for retrieving todos
 
   rpc ListTodos(Category) returns (stream TodoItem) {}
 }
