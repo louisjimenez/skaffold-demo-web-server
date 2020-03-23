@@ -1,5 +1,6 @@
 FROM golang:1.14-alpine3.11 as builder
-COPY app.go .
+WORKDIR app
+COPY app.go go.mod go.sum ./
 RUN go build -o /app .
 
 FROM alpine:3.11

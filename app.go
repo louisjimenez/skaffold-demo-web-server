@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
-	pb "github.com/louisjimenez/skaffold-demo-web-server/todo"
+	pb "github.com/louisjimenez/skaffold-demo-config"
 )
 
 const (
