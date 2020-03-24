@@ -3,13 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
+	pb "github.com/louisjimenez/skaffold-demo-config"
 	"google.golang.org/grpc"
 	"io"
 	"log"
 	"net/http"
 	"strings"
 	"time"
-	pb "github.com/louisjimenez/skaffold-demo-config"
 )
 
 const (
@@ -45,13 +45,27 @@ func listTodoItems(cat *pb.Category) string {
 	return todoList.String()
 }
 
-func main() {
-	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+func connectGRPC() (*grpc.ClientConn, error) {
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	conn, err := grpc.DialContext(ctx, address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Fatalf("Unable to connect: %v", err)
+		return nil, err
 	}
-	defer conn.Close()
 	client = pb.NewTodoClient(conn)
 	http.HandleFunc("/", handler)
+	return conn, nil
+}
+
+func healthcheckHandler(w http.ResponseWriter, _ *http.Request) {
+	fmt.Fprint(w, "OK")
+}
+
+func main() {
+	http.HandleFunc("/health", healthcheckHandler)
+	conn, err := connectGRPC()
+	if err != nil {
+		log.Printf("Unable to connect: %v", err)
+	}
+	defer conn.Close()
 	http.ListenAndServe("localhost:8080", nil)
 }
