@@ -7,5 +7,6 @@ An example Web Server microservice for evaluating Skaffold.
 ### Run the Skaffold dev loop with port forwarding
 `skaffold debug --default-repo <path-to-registry> --port-forward`
 
-### Compile Protos
-`protoc -I todo/ todo/todo.proto --go_out=plugins=grpc:todo`
+## Deploy
+
+skaffold run --default-repo <path-to-registry>

@@ -2,18 +2,27 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	pb "github.com/louisjimenez/skaffold-demo-config"
 	"google.golang.org/grpc"
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
 
+var (
+	host string
+	port string
+)
+
 const (
-	address = "localhost:50051"
+	defGrpcServerAddr = "localhost:8090"
+	GrpcHostEnv       = "GRPC_SERVER_HOST"
+	GrpcPortEnv       = "GRPC_SERVER_PORT"
 )
 
 var client pb.TodoClient
@@ -26,7 +35,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func listTodoItems(cat *pb.Category) string {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	stream, err := client.ListTodos(ctx, cat)
+	stream, err := client.List(ctx, cat)
 	if err != nil {
 		log.Fatalf("Unable to ListTodos: %v", err)
 	}
@@ -45,9 +54,9 @@ func listTodoItems(cat *pb.Category) string {
 	return todoList.String()
 }
 
-func connectGRPC() (*grpc.ClientConn, error) {
+func connectGRPC(host string) (*grpc.ClientConn, error) {
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	conn, err := grpc.DialContext(ctx, address, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.DialContext(ctx, host, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return nil, err
 	}
@@ -61,11 +70,27 @@ func healthcheckHandler(w http.ResponseWriter, _ *http.Request) {
 }
 
 func main() {
+	flag.StringVar(&host, "host", "", "host of grpc server")
+	flag.StringVar(&port, "port", "", "port of grpc server")
+	flag.Parse()
+	if host == "" {
+		if host, port = os.Getenv(GrpcHostEnv), os.Getenv(GrpcPortEnv); host == "" || port == "" {
+			log.Printf("host %v port %v \n", host, port)
+			host = defGrpcServerAddr
+			log.Printf("addr %v \n", host)
+
+		} else {
+			host = strings.Join([]string{host, port}, ":")
+		}
+	}
+	log.Printf("GRPC server address is %v \n", host)
+
+
 	http.HandleFunc("/health", healthcheckHandler)
-	conn, err := connectGRPC()
+	conn, err := connectGRPC(host)
 	if err != nil {
 		log.Printf("Unable to connect: %v", err)
 	}
 	defer conn.Close()
-	http.ListenAndServe("localhost:8080", nil)
+	http.ListenAndServe(":9000", nil)
 }

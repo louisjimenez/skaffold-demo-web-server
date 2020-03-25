@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: web-server
-  namespace: default
   labels:
     app: web-server
 spec:
@@ -18,5 +17,15 @@ spec:
       containers:
         - name: web-server
           image: web-server
+          imagePullPolicy: Always
+          env:
+            - name: GRPC_SERVER_HOST
+              value: grpc-server
+            - name: GRPC_SERVER_PORT
+              value: "8090"
           ports:
-            - containerPort: 8080
+            - name: http
+              containerPort: 9000
+              protocol: TCP
+          resources:
+            {}
